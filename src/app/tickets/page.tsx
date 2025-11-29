@@ -120,6 +120,28 @@ export default function MyTicketsPage() {
           ))}
         </div>
 
+        {/* Earn Rewards Section */}
+        <div className="border border-t-0 corner-accents">
+          <div className="p-6 md:p-8 border-b">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <Link href="/rewards">
+                <button className="border corner-accents flex hover:bg-accent hover:text-white cursor-pointer transition-colors items-center justify-center gap-2 px-4 py-3 bg-accent/5 font-mono">
+                  Play
+                  <ArrowUpRight className="w-4 h-4" />
+                </button>
+              </Link>
+              <div className="text-right">
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+                  Earn Rewards
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Complete challenges and earn tokens
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Active Tickets */}
         <div className="border border-t-0 corner-accents">
           <div className="p-6 md:p-8 border-b">
