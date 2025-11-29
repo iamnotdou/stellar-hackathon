@@ -15,6 +15,13 @@ const GAME_CONFIG = {
     Y: 300,
   },
 
+  // Grid background colors
+  COLORS: {
+    BACKGROUND: 0x050505,
+    GRID: 0xFFFFFF,
+    GRID_ALPHA: 0.05,
+  },
+
   RIM_STYLE: {
     VISIBLE: true,
     RADIUS: 180,
@@ -67,14 +74,14 @@ const GAME_CONFIG = {
   },
 
   ANIMATION: {
-    DURATION: 4,
-    SPINS: 4,
+    DURATION: 8,
+    SPINS: 6,
     EASE: 'power4.out',
   },
 
   TICKER: {
     ANGLE: 15,
-    DURATION: 0.1,
+    BASE_DURATION: 0.1,
   },
 
   PRIZES: [
@@ -100,6 +107,7 @@ export default function FortuneWheel({ onWin, className = '' }: FortuneWheelProp
   const spinLayerRef = useRef<PIXI.Container | null>(null);
   const pointerSpriteRef = useRef<PIXI.Sprite | null>(null);
   const buttonRef = useRef<PIXI.Sprite | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -119,10 +127,21 @@ export default function FortuneWheel({ onWin, className = '' }: FortuneWheelProp
       await app.init({
         width: GAME_CONFIG.SCENE.WIDTH,
         height: GAME_CONFIG.SCENE.HEIGHT,
-        backgroundAlpha: 0,
+        backgroundColor: GAME_CONFIG.COLORS.BACKGROUND,
+        backgroundAlpha: 1,
         autoDensity: true,
         resolution: window.devicePixelRatio || 1,
       });
+
+      // Initialize Audio Context
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtxRef.current = new AudioContextClass();
+        }
+      } catch (e) {
+        console.error('Audio API Error', e);
+      }
 
       if (containerRef.current) {
         containerRef.current.appendChild(app.canvas);
@@ -170,18 +189,32 @@ export default function FortuneWheel({ onWin, className = '' }: FortuneWheelProp
     const root = new PIXI.Container();
     app.stage.addChild(root);
 
-    // Background
-    if (assets.background) {
-      const bg = new PIXI.Sprite(assets.background);
-      bg.width = GAME_CONFIG.SCENE.WIDTH;
-      bg.height = GAME_CONFIG.SCENE.HEIGHT;
-      root.addChild(bg);
+    // Grid Background
+    const gridG = new PIXI.Graphics();
+    gridG.beginPath();
+    const gridSize = 50; // Smaller grid for 800x600
+    
+    for (let x = 0; x <= GAME_CONFIG.SCENE.WIDTH; x += gridSize) {
+      gridG.moveTo(x, 0);
+      gridG.lineTo(x, GAME_CONFIG.SCENE.HEIGHT);
     }
+    for (let y = 0; y <= GAME_CONFIG.SCENE.HEIGHT; y += gridSize) {
+      gridG.moveTo(0, y);
+      gridG.lineTo(GAME_CONFIG.SCENE.WIDTH, y);
+    }
+    gridG.stroke({ width: 1, color: GAME_CONFIG.COLORS.GRID, alpha: GAME_CONFIG.COLORS.GRID_ALPHA });
+    root.addChild(gridG);
 
     // Main wheel container
     const mainWheelWrapper = new PIXI.Container();
     mainWheelWrapper.position.set(GAME_CONFIG.CENTER.X, GAME_CONFIG.CENTER.Y);
     root.addChild(mainWheelWrapper);
+
+    // Shadow effect
+    const shadow = new PIXI.Graphics();
+    shadow.ellipse(0, 0, 210, 210); // Adjusted for smaller wheel
+    shadow.fill({ color: 0x000000, alpha: 0.5 });
+    mainWheelWrapper.addChild(shadow);
 
     // Spinning layer
     const spinLayer = new PIXI.Container();
@@ -368,6 +401,11 @@ export default function FortuneWheel({ onWin, className = '' }: FortuneWheelProp
   const startSpin = () => {
     if (!spinLayerRef.current || !buttonRef.current) return;
 
+    // Audio context resume
+    if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume();
+    }
+
     const btn = buttonRef.current;
     btn.eventMode = 'none';
     btn.alpha = 0.5;
@@ -377,9 +415,11 @@ export default function FortuneWheel({ onWin, className = '' }: FortuneWheelProp
     
     const sectorCount = prizes.length;
     const sectorAngle = (Math.PI * 2) / sectorCount;
-    const targetRotation = GAME_CONFIG.ANIMATION.SPINS * Math.PI * 2 - (winningIndex * sectorAngle + sectorAngle / 2);
+    const randomOffset = (Math.random() - 0.5) * (sectorAngle * 0.4);
+    const targetRotation = GAME_CONFIG.ANIMATION.SPINS * Math.PI * 2 - (winningIndex * sectorAngle + sectorAngle / 2) + randomOffset;
 
     let previousSectorIndex = -1;
+    let lastRotation = spinLayerRef.current.rotation;
 
     gsap.to(spinLayerRef.current, {
       rotation: targetRotation,
@@ -390,6 +430,9 @@ export default function FortuneWheel({ onWin, className = '' }: FortuneWheelProp
         if (!spinLayerRef.current) return;
         
         const currentRot = spinLayerRef.current.rotation;
+        const velocity = Math.abs(currentRot - lastRotation);
+        lastRotation = currentRot;
+
         let normalizedRot = currentRot % (Math.PI * 2);
         if (normalizedRot < 0) normalizedRot += Math.PI * 2;
 
@@ -399,7 +442,7 @@ export default function FortuneWheel({ onWin, className = '' }: FortuneWheelProp
 
         if (currentIndex !== previousSectorIndex) {
           if (previousSectorIndex !== -1) {
-            playTickAnimation();
+            triggerTick(velocity);
           }
           previousSectorIndex = currentIndex;
         }
@@ -420,25 +463,57 @@ export default function FortuneWheel({ onWin, className = '' }: FortuneWheelProp
     });
   };
 
-  const playTickAnimation = () => {
-    if (!pointerSpriteRef.current) return;
+  const triggerTick = (velocity: number) => {
+    const intensity = Math.min(Math.max(velocity * 8, 0.1), 1);
 
-    gsap.killTweensOf(pointerSpriteRef.current);
+    if (audioCtxRef.current) {
+      playProceduralClick(intensity);
+    }
 
-    const baseRotation = Math.PI;
-    const kickAngleRad = (GAME_CONFIG.TICKER.ANGLE * Math.PI) / 180;
+    if (pointerSpriteRef.current) {
+      gsap.killTweensOf(pointerSpriteRef.current);
+      const baseRotation = Math.PI;
+      const dynamicAngle = GAME_CONFIG.TICKER.ANGLE * intensity;
+      const kickAngleRad = (dynamicAngle * Math.PI) / 180;
+      const duration = Math.max(GAME_CONFIG.TICKER.BASE_DURATION / (intensity * 2 + 0.5), 0.04);
+
+      const tl = gsap.timeline();
+      tl.to(pointerSpriteRef.current, {
+        rotation: baseRotation - kickAngleRad,
+        duration: duration * 0.3,
+        ease: 'power1.out',
+      })
+      .to(pointerSpriteRef.current, {
+        rotation: baseRotation,
+        duration: duration * 0.7,
+        ease: 'elastic.out(1, 0.5)',
+      });
+    }
+  };
+
+  const playProceduralClick = (intensity: number) => {
+    if (!audioCtxRef.current) return;
+
+    const osc = audioCtxRef.current.createOscillator();
+    const gainNode = audioCtxRef.current.createGain();
+
+    osc.connect(gainNode);
+    gainNode.connect(audioCtxRef.current.destination);
+
+    const baseFreq = 100;
+    const maxFreqAdd = 500;
     
-    const tl = gsap.timeline();
-    tl.to(pointerSpriteRef.current, {
-      rotation: baseRotation - kickAngleRad,
-      duration: GAME_CONFIG.TICKER.DURATION * 0.3,
-      ease: 'power1.out',
-    })
-    .to(pointerSpriteRef.current, {
-      rotation: baseRotation,
-      duration: GAME_CONFIG.TICKER.DURATION * 0.7,
-      ease: 'elastic.out(1, 0.5)',
-    });
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(baseFreq + (maxFreqAdd * intensity), audioCtxRef.current.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(baseFreq, audioCtxRef.current.currentTime + 0.1);
+
+    const volume = intensity * 0.8;
+    gainNode.gain.setValueAtTime(0, audioCtxRef.current.currentTime);
+    gainNode.gain.linearRampToValueAtTime(volume, audioCtxRef.current.currentTime + 0.005);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtxRef.current.currentTime + 0.1);
+
+    osc.start(audioCtxRef.current.currentTime);
+    osc.stop(audioCtxRef.current.currentTime + 0.1);
   };
 
   return (

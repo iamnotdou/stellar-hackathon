@@ -1,0 +1,13 @@
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #000; /* Черный фон подложки */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+canvas {
+  display: block; /* Убирает лишние отступы */
+}

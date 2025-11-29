@@ -28,14 +28,18 @@ export default function CreateEventPage() {
         <div className="border border-t-0 corner-accents">
           <div className="grid grid-cols-1 md:grid-cols-3 md:divide-x">
             <div
-              style={{
-                backgroundImage: `url(/cave.png)`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-              }}
-              className="md:col-span-2 p-8 md:p-12  space-y-4 border-b md:border-b-0"
+              className="md:col-span-2 p-8 md:p-12 space-y-4 border-b md:border-b-0 relative"
             >
+              <div 
+                className="absolute inset-0 opacity-60"
+                style={{
+                  backgroundImage: `url(/cave.png)`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+              ></div>
+              <div className="relative z-10">
               <div className="inline-block border corner-accents bg-accent/5 text-accent px-3 py-1 text-xs font-bold">
                 [EVENT_CREATOR]
               </div>
@@ -45,6 +49,7 @@ export default function CreateEventPage() {
               <p className="text-muted-foreground text-sm">
                 &gt; DEPLOY_NEW_NFT_TICKET_CONTRACT
               </p>
+              </div>
             </div>
             {/* Info */}
             <div className="flex flex-col divide-y">
