@@ -74,7 +74,15 @@ export default function MyTicketsPage() {
         {/* Header Section */}
         <div className="border border-t-0 corner-accents">
           <div className="grid grid-cols-1 md:grid-cols-3 md:divide-x">
-            <div className="md:col-span-2 p-8 md:p-12 space-y-4 border-b md:border-b-0">
+            <div
+              className="md:col-span-2 p-8 md:p-12 space-y-4 border-b md:border-b-0"
+              style={{
+                backgroundImage: `url(/WhatsApp%20Görsel%202025-11-29%20saat%2019.52.21_bab4c795.png)`,
+                backgroundSize: "contain",
+                backgroundPosition: "right",
+                backgroundRepeat: "no-repeat",
+              }}
+            >
               <div className="inline-block border corner-accents bg-accent/5 text-accent px-3 py-1 text-xs font-bold">
                 [YOUR_WALLET]
               </div>
@@ -122,7 +130,15 @@ export default function MyTicketsPage() {
 
         {/* Earn Rewards Section */}
         <div className="border border-t-0 corner-accents">
-          <div className="p-6 md:p-8 border-b">
+          <div 
+            className="p-6 md:p-8 border-b"
+            style={{
+              backgroundImage: `url(/WhatsApp%20Görsel%202025-11-29%20saat%2020.28.56_af709104.jpg)`,
+              backgroundSize: "contain",
+              backgroundPosition: "right center",
+              backgroundRepeat: "no-repeat",
+            }}
+          >
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <Link href="/rewards">
                 <button className="border corner-accents flex hover:bg-accent hover:text-white cursor-pointer transition-colors items-center justify-center gap-2 px-4 py-3 bg-accent/5 font-mono">
