@@ -1,7 +1,6 @@
 "use client";
 
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { MainLayout } from "@/components/layouts";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, Search, Filter } from "lucide-react";
 import Link from "next/link";
@@ -17,7 +16,7 @@ export default function DiscoverPage() {
 
   const events = [
     {
-      name: "Ethereum Denver 2024",
+      name: "Stellar Denver 2024",
       date: "MAR 15, 2024",
       location: "Denver, CO",
       price: "0.5 ETH",
@@ -85,9 +84,7 @@ export default function DiscoverPage() {
   ];
 
   return (
-    <div className=" min-h-screen">
-      <Header />
-
+    <MainLayout>
       <div className="max-w-5xl mx-auto md:px-0">
         {/* Hero Section */}
         <div className="border border-t-0 corner-accents">
@@ -238,8 +235,6 @@ export default function DiscoverPage() {
           </Button>
         </div>
       </div>
-
-      <Footer />
-    </div>
+    </MainLayout>
   );
 }

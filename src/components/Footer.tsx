@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <div className="border mx-auto border-t-0 corner-accents max-w-5xl mx-auto">
+    <div className="border border-t-0 corner-accents max-w-5xl mx-auto w-full">
       <div
         className="p-6 md:p-8"
         style={{
@@ -43,8 +43,8 @@ export default function Footer() {
               Sticket
             </Link>
             <p className="text-sm text-muted-foreground max-w-sm">
-              The first truly transparent ticketing platform powered by
-              Ethereum. Own your tickets, trade them freely.
+              The first truly transparent ticketing platform powered by Stellar.
+              Own your tickets, trade them freely.
             </p>
           </div>
           <div>

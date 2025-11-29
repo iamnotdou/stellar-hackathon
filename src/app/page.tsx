@@ -10,7 +10,7 @@ export default function Home() {
     {
       title: "Secure & Verifiable",
       description:
-        "Every ticket exists on Ethereum — immutable, transparent, and linked to its rightful owner.",
+        "Every ticket exists on Stellar — immutable, transparent, and linked to its rightful owner.",
       image: "/lock.png",
     },
     {
@@ -35,7 +35,7 @@ export default function Home() {
 
   const events = [
     {
-      name: "Ethereum Denver 2024",
+      name: "Stellar Denver 2024",
       date: "MAR 15",
       location: "Denver, CO",
       price: "0.5 ETH",
@@ -64,7 +64,7 @@ export default function Home() {
     {
       type: "PURCHASE",
       user: "0x742d...3f8a",
-      event: "Ethereum Denver 2024",
+      event: "Stellar Denver 2024",
       amount: "0.5 ETH",
       time: "2m ago",
     },
@@ -92,7 +92,7 @@ export default function Home() {
     {
       type: "PURCHASE",
       user: "0x8c4d...1a3f",
-      event: "Ethereum Denver 2024",
+      event: "Stellar Denver 2024",
       amount: "0.5 ETH",
       time: "15m ago",
     },
@@ -180,7 +180,7 @@ export default function Home() {
             <div className="md:col-span-2 p-6 md:p-8 space-y-4">
               <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-3 py-1 rounded-full text-xs font-medium">
                 <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></div>
-                POWERED BY ETHEREUM
+                POWERED BY STELLAR
               </div>
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight leading-tight">
                 The first truly transparent ticketing platform.

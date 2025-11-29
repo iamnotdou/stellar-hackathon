@@ -6,15 +6,8 @@ import { toast } from "sonner";
 import { useEffect } from "react";
 
 export function FreighterConnect() {
-  const {
-    isConnected,
-    publicKey,
-    network,
-    connect,
-    disconnect,
-    isLoading,
-    error,
-  } = useFreighter();
+  const { isConnected, publicKey, connect, disconnect, isLoading, error } =
+    useFreighter();
 
   useEffect(() => {
     if (error) {
@@ -45,17 +38,18 @@ export function FreighterConnect() {
   };
 
   if (isLoading) {
-    return (
-      <Button disabled>
-        Loading...
-      </Button>
-    );
+    return <Button disabled>Loading...</Button>;
   }
 
   if (isConnected && publicKey) {
     return (
       <div className="flex items-center gap-2">
-        <Button onClick={handleDisconnect} variant="outline" size="sm" className="hidden md:flex">
+        <Button
+          onClick={handleDisconnect}
+          variant="outline"
+          size="sm"
+          className="hidden md:flex"
+        >
           Disconnect
         </Button>
         <div className="border corner-accents px-3 py-2 rounded hover:bg-muted/30 transition-colors cursor-pointer">
@@ -76,4 +70,3 @@ export function FreighterConnect() {
     </Button>
   );
 }
-
