@@ -69,12 +69,14 @@ For detailed information about the project, architecture, and development guidel
 For smart contract documentation, see **[sticket-contracts/README.md](./sticket-contracts/README.md)**.
 
 Additional documentation:
+
 - **[CONTRACTS.md](./info/CONTRACTS.md)** - Smart contract details
 - **[PITCH_DECK.md](./PITCH_DECK.md)** - Project pitch and vision
 
 ## 🏗️ Tech Stack
 
 ### Frontend
+
 - **Framework**: Next.js 15.5.6 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4
@@ -85,12 +87,14 @@ Additional documentation:
 - **Animations**: GSAP
 
 ### Blockchain
+
 - **Network**: Stellar (Soroban smart contracts)
 - **Wallet**: Freighter
 - **SDK**: @stellar/stellar-sdk, @stellar/freighter-api
 - **Storage**: IPFS via Pinata
 
 ### Smart Contracts
+
 - **Language**: Rust
 - **Platform**: Soroban (Stellar)
 - **Contracts**: Factory pattern for event deployment, NFT collections for tickets
@@ -139,6 +143,7 @@ sticket/
 ### ✅ Implemented
 
 #### Frontend
+
 - Complete UI/UX design system with retro tech aesthetic
 - All page layouts and routing
 - Component library (shadcn/ui)
@@ -154,6 +159,7 @@ sticket/
 - IPFS integration for metadata
 
 #### Smart Contracts
+
 - Factory contract for event deployment
 - NFT collections contract for tickets
 - Primary and secondary market functionality
@@ -162,6 +168,7 @@ sticket/
 - TypeScript SDKs generated
 
 ### 🚧 In Progress / Planned
+
 - Mainnet deployment
 - Enhanced analytics dashboard
 - Mobile app
