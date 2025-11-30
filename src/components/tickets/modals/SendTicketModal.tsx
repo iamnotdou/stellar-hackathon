@@ -98,7 +98,7 @@ export function SendTicketModal({
     return (
       <div
         aria-hidden="true"
-        className={`flex size-11 shrink-0 items-center justify-center rounded-full border ${
+        className={`flex size-11 shrink-0 items-center justify-center rounded-lg border ${
           isSuccess
             ? "border-green-500/30 bg-green-500/10"
             : "border-accent/30 bg-accent/10"

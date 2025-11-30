@@ -1,12 +1,75 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useFreighter } from "@/providers/FreighterProvider";
+import {
+  Client as NftClient,
+  networks,
+} from "../../packages/sticket-nft-collections/src/index";
 import type {
   Ticket,
   UseTicketActionsReturn,
 } from "@/components/tickets/types";
 
+// Convert price to stroops (1 XLM = 10^7 stroops)
+function toStroops(price: number): bigint {
+  return BigInt(Math.floor(price * 10_000_000));
+}
+
+// Create NFT client for a specific contract
+function createNftClient(
+  contractId: string,
+  publicKey: string,
+  signTransaction: (
+    xdr: string,
+    opts?: { networkPassphrase?: string; address?: string }
+  ) => Promise<{ signedTxXdr: string; signerAddress: string }>,
+  signAuthEntry: (
+    entryXdr: string,
+    opts?: { networkPassphrase?: string; address?: string }
+  ) => Promise<{ signedAuthEntry: string | null; signerAddress: string }>
+) {
+  return new NftClient({
+    contractId,
+    networkPassphrase: networks.testnet.networkPassphrase,
+    rpcUrl: "https://soroban-testnet.stellar.org",
+    publicKey,
+    signTransaction: async (xdr: string) => {
+      console.log("Signing transaction...");
+      const result = await signTransaction(xdr, {
+        networkPassphrase: networks.testnet.networkPassphrase,
+        address: publicKey,
+      });
+      console.log("Transaction signed");
+      return {
+        signedTxXdr: result.signedTxXdr,
+        signerAddress: result.signerAddress,
+      };
+    },
+    signAuthEntry: async (entryXdr: string) => {
+      console.log("Signing auth entry...");
+      const result = await signAuthEntry(entryXdr, {
+        networkPassphrase: networks.testnet.networkPassphrase,
+        address: publicKey,
+      });
+      console.log(
+        "Auth entry signed:",
+        result.signedAuthEntry ? "success" : "null"
+      );
+      // Return the signed auth entry or throw if null
+      if (!result.signedAuthEntry) {
+        throw new Error("Failed to sign auth entry");
+      }
+      return {
+        signedAuthEntry: result.signedAuthEntry,
+        signerAddress: result.signerAddress,
+      };
+    },
+  });
+}
+
 export function useTicketActions(): UseTicketActionsReturn {
+  const { publicKey, signTransaction, signAuthEntry } = useFreighter();
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [activeModal, setActiveModal] = useState<
     "view" | "send" | "sell" | null
@@ -48,28 +111,49 @@ export function useTicketActions(): UseTicketActionsReturn {
         throw new Error("No ticket selected");
       }
 
+      if (!publicKey) {
+        setError("Wallet not connected");
+        throw new Error("Wallet not connected");
+      }
+
       setIsProcessing(true);
       setError(null);
 
       try {
-        // TODO: Implement actual Stellar/Soroban transaction
-        // 1. Build transfer transaction
-        // 2. Sign with Freighter
-        // 3. Submit to network
+        // Create NFT client for this ticket's contract
+        const nftClient = createNftClient(
+          selectedTicket.contractAddress,
+          publicKey,
+          signTransaction,
+          signAuthEntry
+        );
+
+        // Extract ticket_id (u32) from tokenId
+        const ticketId = parseInt(
+          selectedTicket.tokenId.replace(/\D/g, ""),
+          10
+        );
 
         console.log("Sending ticket:", {
-          ticketId: selectedTicket.id,
-          tokenId: selectedTicket.tokenId,
+          from: publicKey,
+          to: toAddress,
+          ticketId,
           contractAddress: selectedTicket.contractAddress,
-          toAddress,
         });
 
-        // Simulate network delay
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        // Call transfer_ticket on the contract
+        const tx = await nftClient.transfer_ticket({
+          from: publicKey,
+          to: toAddress,
+          ticket_id: ticketId,
+        });
 
-        // On success, update local state
-        // In production, this would be handled by a state manager or refetch
+        // Sign and submit the transaction
+        await tx.signAndSend();
+
+        console.log("Ticket transfer successful!");
       } catch (err) {
+        console.error("Transfer error:", err);
         const message = err instanceof Error ? err.message : "Transfer failed";
         setError(message);
         throw new Error(message);
@@ -77,7 +161,7 @@ export function useTicketActions(): UseTicketActionsReturn {
         setIsProcessing(false);
       }
     },
-    [selectedTicket]
+    [selectedTicket, publicKey, signTransaction, signAuthEntry]
   );
 
   const listTicket = useCallback(
@@ -87,59 +171,207 @@ export function useTicketActions(): UseTicketActionsReturn {
         throw new Error("No ticket selected");
       }
 
+      if (!publicKey) {
+        setError("Wallet not connected");
+        throw new Error("Wallet not connected");
+      }
+
       setIsProcessing(true);
       setError(null);
 
       try {
-        // TODO: Implement actual marketplace listing
-        // 1. Approve marketplace contract
-        // 2. Create listing transaction
-        // 3. Sign with Freighter
-        // 4. Submit to network
+        // Create NFT client for this ticket's contract
+        const nftClient = createNftClient(
+          selectedTicket.contractAddress,
+          publicKey,
+          signTransaction,
+          signAuthEntry
+        );
 
-        console.log("Listing ticket:", {
-          ticketId: selectedTicket.id,
-          tokenId: selectedTicket.tokenId,
-          price,
-          currency,
-        });
+        // Extract ticket_id (u32) from tokenId
+        const ticketIdStr = selectedTicket.tokenId.replace(/\D/g, "");
+        const ticketId = parseInt(ticketIdStr, 10);
 
-        // Simulate network delay
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        if (isNaN(ticketId) || ticketId < 0) {
+          throw new Error(`Invalid ticket ID: ${selectedTicket.tokenId}`);
+        }
+
+        // Pre-check: Verify ticket ownership and status
+        console.log("Pre-check: Verifying ticket status...");
+        try {
+          const ticketTx = await nftClient.get_ticket({ ticket_id: ticketId });
+          const ticketResult = await ticketTx.simulate();
+          const ticketData = ticketResult.result as {
+            owner: string;
+            is_used: boolean;
+            ticket_id: number;
+          };
+
+          console.log("Ticket data:", ticketData);
+
+          if (ticketData.owner !== publicKey) {
+            throw new Error(
+              `You don't own this ticket. Owner: ${ticketData.owner.slice(
+                0,
+                8
+              )}...`
+            );
+          }
+
+          if (ticketData.is_used) {
+            throw new Error("Cannot list a used ticket");
+          }
+        } catch (preCheckErr) {
+          if (
+            preCheckErr instanceof Error &&
+            preCheckErr.message.includes("don't own")
+          ) {
+            throw preCheckErr;
+          }
+          if (
+            preCheckErr instanceof Error &&
+            preCheckErr.message.includes("used ticket")
+          ) {
+            throw preCheckErr;
+          }
+          console.warn("Pre-check failed, continuing anyway:", preCheckErr);
+        }
+
+        // Convert price to stroops (i128)
+        const priceInStroops = toStroops(price);
+
+        if (priceInStroops <= BigInt(0)) {
+          throw new Error("Price must be greater than 0");
+        }
+
+        // Pre-check: Check if already listed
+        let isAlreadyListed = false;
+        try {
+          const listingTx = await nftClient.get_secondary_listing({
+            ticket_id: ticketId,
+          });
+          const listingResult = await listingTx.simulate();
+          const listing = listingResult.result;
+
+          // If listing exists and is not None/null, the ticket is already listed
+          if (listing && typeof listing === "object" && "seller" in listing) {
+            isAlreadyListed = true;
+            console.log("Ticket is already listed, will update price instead");
+          }
+        } catch (listingCheckErr) {
+          // If listing check fails (e.g., no listing exists), that's fine
+          console.log(
+            "No existing listing found, will create new listing",
+            listingCheckErr
+          );
+        }
+
+        if (isAlreadyListed) {
+          // Update existing listing price
+          console.log("Updating listing price:", {
+            seller: publicKey,
+            ticketId,
+            newPrice: priceInStroops.toString(),
+            contractAddress: selectedTicket.contractAddress,
+          });
+
+          const tx = await nftClient.update_listing_price({
+            seller: publicKey,
+            ticket_id: ticketId,
+            new_price: priceInStroops,
+          });
+
+          await tx.signAndSend();
+          console.log("Listing price updated successfully!");
+        } else {
+          // Create new listing
+          console.log("Listing ticket:", {
+            seller: publicKey,
+            ticketId,
+            ticketIdType: typeof ticketId,
+            price: priceInStroops.toString(),
+            priceType: typeof priceInStroops,
+            currency,
+            contractAddress: selectedTicket.contractAddress,
+          });
+
+          const tx = await nftClient.list_ticket({
+            seller: publicKey,
+            ticket_id: ticketId,
+            price: priceInStroops,
+          });
+
+          await tx.signAndSend();
+          console.log("Ticket listed successfully!");
+        }
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Listing failed";
-        setError(message);
-        throw new Error(message);
+        console.error("Listing error:", err);
+        const errorMessage =
+          err instanceof Error ? err.message : "Listing failed";
+
+        // Parse common contract errors for better UX
+        let friendlyMessage = errorMessage;
+        if (errorMessage.includes("UnreachableCodeReached")) {
+          friendlyMessage =
+            "Contract validation failed. This could mean:\n" +
+            "• You don't own this ticket\n" +
+            "• The ticket is already listed\n" +
+            "• The ticket has been used";
+        }
+
+        setError(friendlyMessage);
+        throw new Error(friendlyMessage);
       } finally {
         setIsProcessing(false);
       }
     },
-    [selectedTicket]
+    [selectedTicket, publicKey, signTransaction, signAuthEntry]
   );
 
   const cancelListing = useCallback(async (): Promise<void> => {
-    if (!selectedTicket || !selectedTicket.listingId) {
-      setError("No active listing found");
-      throw new Error("No active listing found");
+    if (!selectedTicket) {
+      setError("No ticket selected");
+      throw new Error("No ticket selected");
+    }
+
+    if (!publicKey) {
+      setError("Wallet not connected");
+      throw new Error("Wallet not connected");
     }
 
     setIsProcessing(true);
     setError(null);
 
     try {
-      // TODO: Implement actual listing cancellation
-      // 1. Build cancel transaction
-      // 2. Sign with Freighter
-      // 3. Submit to network
+      // Create NFT client for this ticket's contract
+      const nftClient = createNftClient(
+        selectedTicket.contractAddress,
+        publicKey,
+        signTransaction,
+        signAuthEntry
+      );
+
+      // Extract ticket_id (u32) from tokenId
+      const ticketId = parseInt(selectedTicket.tokenId.replace(/\D/g, ""), 10);
 
       console.log("Canceling listing:", {
-        ticketId: selectedTicket.id,
-        listingId: selectedTicket.listingId,
+        seller: publicKey,
+        ticketId,
+        contractAddress: selectedTicket.contractAddress,
       });
 
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Call delist_ticket on the contract
+      const tx = await nftClient.delist_ticket({
+        seller: publicKey,
+        ticket_id: ticketId,
+      });
+
+      // Sign and submit the transaction
+      await tx.signAndSend();
+
+      console.log("Listing canceled successfully!");
     } catch (err) {
+      console.error("Cancel listing error:", err);
       const message =
         err instanceof Error ? err.message : "Failed to cancel listing";
       setError(message);
@@ -147,7 +379,7 @@ export function useTicketActions(): UseTicketActionsReturn {
     } finally {
       setIsProcessing(false);
     }
-  }, [selectedTicket]);
+  }, [selectedTicket, publicKey, signTransaction, signAuthEntry]);
 
   // Utility functions
   const generateQRCode = useCallback((ticket: Ticket): string => {

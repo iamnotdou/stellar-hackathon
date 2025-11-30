@@ -2,11 +2,11 @@
 
 ## 📋 Project Overview
 
-**Sticket** is a decentralized event ticketing platform built on Ethereum that transforms traditional event tickets into Non-Fungible Tokens (NFTs). The platform enables transparent, verifiable, and transferable ticket ownership with zero platform fees and full user control.
+**Sticket** is a decentralized event ticketing platform built on Stellar that transforms traditional event tickets into Non-Fungible Tokens (NFTs). The platform enables transparent, verifiable, and transferable ticket ownership with zero platform fees and full user control.
 
 ### Core Concept
 
-- **Tickets as NFTs**: Each event ticket is minted as an ERC-721 NFT on Ethereum
+- **Tickets as NFTs**: Each event ticket is minted as an ERC-721 NFT on Stellar
 - **Blockchain Verification**: All tickets are immutable and verifiable on-chain
 - **Zero Middlemen**: Direct peer-to-peer transactions with no platform fees
 - **Full Ownership**: Users can transfer, resell, or trade tickets freely
@@ -35,7 +35,7 @@ The primary objective of Sticket is to revolutionize event ticketing by:
 - **UI Components**: Radix UI primitives with custom styling
 - **3D Graphics**: Three.js + React Three Fiber for visual effects
 - **Form Handling**: React Hook Form + Zod validation
-- **Blockchain**: Ethereum (ERC-721 standard for NFTs)
+- **Blockchain**: Stellar (ERC-721 standard for NFTs)
 
 ### Project Structure
 
@@ -355,7 +355,7 @@ npm run lint
 - [Tailwind CSS](https://tailwindcss.com)
 - [Radix UI](https://www.radix-ui.com)
 - [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
-- [ERC-721 Standard](https://eips.ethereum.org/EIPS/eip-721)
+- [ERC-721 Standard](https://eips.Stellar.org/EIPS/eip-721)
 
 ---
 

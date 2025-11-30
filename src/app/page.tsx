@@ -2,10 +2,113 @@
 import Dither from "@/components/Dither";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { FreighterConnect } from "@/components/FreighterConnect";
+import { useAllEvents, type FullEventData } from "@/hooks/use-all-events";
+import { useMemo } from "react";
+
+// Format timestamp to readable date
+function formatDate(timestamp: number): string {
+  const date = new Date(timestamp * 1000);
+  return date
+    .toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    })
+    .toUpperCase();
+}
+
+// Get event status based on availability
+function getEventStatus(event: FullEventData): string {
+  if (event.tickets_available === 0) return "SOLD OUT";
+  if (event.tickets_available < event.total_supply * 0.2) return "SELLING FAST";
+  if (event.tickets_available < event.total_supply * 0.5) return "ALMOST SOLD";
+  return "ON SALE";
+}
+
+// Truncate address
+function truncateAddress(address: string): string {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+// Placeholder images for events
+const PLACEHOLDER_IMAGES = [
+  "/lock.png",
+  "/hands.png",
+  "/computer.png",
+  "/watchtower.png",
+];
+
+// Get placeholder image based on contract ID (deterministic)
+function getPlaceholderImage(contractId: string): string {
+  const hash = contractId
+    .split("")
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return PLACEHOLDER_IMAGES[hash % PLACEHOLDER_IMAGES.length];
+}
+
+// Convert IPFS URL to gateway URL
+function convertIpfsUrl(url: string): string {
+  if (!url) return "";
+  if (url.startsWith("ipfs://")) {
+    const cid = url.replace("ipfs://", "");
+    return `https://gateway.pinata.cloud/ipfs/${cid}`;
+  }
+  return url;
+}
+
+// Get event image from metadata or fallback to placeholder
+function getEventImage(event: FullEventData): string {
+  const metadataImage = event.metadata?.image;
+  if (metadataImage) {
+    return convertIpfsUrl(metadataImage);
+  }
+  return getPlaceholderImage(event.event_contract);
+}
+
 export default function Home() {
+  const { data: events, isLoading, error } = useAllEvents();
+
+  // Get top 3 events for display
+  const displayEvents = useMemo(() => {
+    if (!events) return [];
+    return events.slice(0, 3);
+  }, [events]);
+
+  // Generate simulated activity from events data
+  const recentActivity = useMemo(() => {
+    if (!events || events.length === 0) return [];
+
+    const activityTypes = ["PURCHASE", "TRANSFER", "MINT"];
+    const times = [
+      "2m ago",
+      "5m ago",
+      "8m ago",
+      "12m ago",
+      "15m ago",
+      "18m ago",
+    ];
+
+    return events.slice(0, 6).flatMap((event, index) => ({
+      type: activityTypes[index % activityTypes.length],
+      user: truncateAddress(event.event_creator),
+      event: event.name,
+      amount: event.tickets_minted > 0 ? `${event.primary_price} XLM` : "—",
+      time: times[index % times.length],
+    }));
+  }, [events]);
+
+  // Stats calculated from live data
+  const stats = useMemo(() => {
+    if (!events) return { totalEvents: 0, ticketsSold: 0, totalAvailable: 0 };
+    return {
+      totalEvents: events.length,
+      ticketsSold: events.reduce((sum, e) => sum + e.tickets_minted, 0),
+      totalAvailable: events.reduce((sum, e) => sum + e.tickets_available, 0),
+    };
+  }, [events]);
+
   const features = [
     {
       title: "Secure & Verifiable",
@@ -30,78 +133,6 @@ export default function Home() {
       description:
         "Supports MetaMask, WalletConnect, and more — mint, buy, and check in with one click.",
       image: "/watchtower.png",
-    },
-  ];
-
-  const events = [
-    {
-      name: "Stellar Denver 2024",
-      date: "MAR 15",
-      location: "Denver, CO",
-      price: "0.5 ETH",
-      available: "234",
-      status: "SELLING FAST",
-    },
-    {
-      name: "Web3 Music Festival",
-      date: "APR 22",
-      location: "Miami, FL",
-      price: "0.3 ETH",
-      available: "567",
-      status: "ON SALE",
-    },
-    {
-      name: "NFT.NYC Conference",
-      date: "MAY 08",
-      location: "New York, NY",
-      price: "0.8 ETH",
-      available: "89",
-      status: "ALMOST SOLD",
-    },
-  ];
-
-  const recentActivity = [
-    {
-      type: "PURCHASE",
-      user: "0x742d...3f8a",
-      event: "Stellar Denver 2024",
-      amount: "0.5 ETH",
-      time: "2m ago",
-    },
-    {
-      type: "TRANSFER",
-      user: "0x9a3f...2c1d",
-      event: "Web3 Music Festival",
-      amount: "—",
-      time: "5m ago",
-    },
-    {
-      type: "PURCHASE",
-      user: "0x1e8b...7d4c",
-      event: "NFT.NYC Conference",
-      amount: "0.8 ETH",
-      time: "8m ago",
-    },
-    {
-      type: "MINT",
-      user: "0x5f2a...9b6e",
-      event: "Crypto Art Expo",
-      amount: "0.2 ETH",
-      time: "12m ago",
-    },
-    {
-      type: "PURCHASE",
-      user: "0x8c4d...1a3f",
-      event: "Stellar Denver 2024",
-      amount: "0.5 ETH",
-      time: "15m ago",
-    },
-    {
-      type: "TRANSFER",
-      user: "0x3b7e...4f2c",
-      event: "Web3 Music Festival",
-      amount: "—",
-      time: "18m ago",
     },
   ];
 
@@ -198,18 +229,22 @@ export default function Home() {
             </div>
             <div className="flex flex-col md:flex-col divide-y md:divide-y">
               <div className="p-4 md:p-6 flex-1 flex flex-col justify-center hover:bg-muted/30 transition-colors">
-                <div className="text-3xl font-bold text-accent">0%</div>
+                <div className="text-3xl font-bold text-accent">
+                  {isLoading ? "..." : stats.totalEvents}
+                </div>
+                <div className="text-sm text-muted-foreground">Live Events</div>
+              </div>
+              <div className="p-6 flex-1 flex flex-col justify-center hover:bg-muted/30 transition-colors">
+                <div className="text-3xl font-bold text-accent">
+                  {isLoading ? "..." : stats.ticketsSold}
+                </div>
                 <div className="text-sm text-muted-foreground">
-                  Platform Fees
+                  Tickets Sold
                 </div>
               </div>
               <div className="p-6 flex-1 flex flex-col justify-center hover:bg-muted/30 transition-colors">
-                <div className="text-3xl font-bold text-accent">100%</div>
-                <div className="text-sm text-muted-foreground">Transparent</div>
-              </div>
-              <div className="p-6 flex-1 flex flex-col justify-center hover:bg-muted/30 transition-colors">
-                <div className="text-3xl font-bold text-accent">∞</div>
-                <div className="text-sm text-muted-foreground">Ownership</div>
+                <div className="text-3xl font-bold text-accent">XLM</div>
+                <div className="text-sm text-muted-foreground">Network</div>
               </div>
             </div>
           </div>
@@ -265,47 +300,94 @@ export default function Home() {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 md:divide-x">
-          {events.map((event, index) => {
-            return (
-              <Link
-                key={event.name}
-                href={`/discover/${index + 1}`}
-                className="p-6 pb-2 hover:bg-muted/30 transition-colors group cursor-pointer border-b md:border-b-0"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="bg-accent/10 text-accent px-2 py-1 text-xs font-bold rounded">
-                      {event.status}
-                    </div>
-                    <div className="text-xs text-muted-foreground border px-2 py-1 rounded">
-                      {event.date}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg tracking-tight group-hover:text-accent transition-colors">
-                      {event.name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {event.location}
-                    </p>
-                  </div>
-                  <div className="flex items-end justify-between pt-2 border-t">
-                    <div>
-                      <div className="text-xs text-muted-foreground">Price</div>
-                      <div className="font-bold ">{event.price}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs text-muted-foreground">
-                        Available
-                      </div>
-                      <div className="font-bold">{event.available}</div>
-                    </div>
-                  </div>
-                  <div></div>
-                </div>
+          {isLoading ? (
+            <div className="md:col-span-3 p-12 flex flex-col items-center justify-center gap-4">
+              <Loader2 className="w-6 h-6 animate-spin text-accent" />
+              <p className="text-sm text-muted-foreground">
+                Loading events from chain...
+              </p>
+            </div>
+          ) : error ? (
+            <div className="md:col-span-3 p-12 text-center">
+              <p className="text-sm text-muted-foreground">
+                Failed to load events
+              </p>
+            </div>
+          ) : displayEvents.length === 0 ? (
+            <div className="md:col-span-3 p-12 text-center">
+              <p className="text-muted-foreground">No events yet</p>
+              <Link href="/create">
+                <Button variant="outline" className="mt-4 font-mono">
+                  Create First Event
+                </Button>
               </Link>
-            );
-          })}
+            </div>
+          ) : (
+            displayEvents.map((event) => {
+              const status = getEventStatus(event);
+              const statusColor =
+                status === "SOLD OUT"
+                  ? "bg-destructive/10 text-destructive"
+                  : status === "SELLING FAST" || status === "ALMOST SOLD"
+                  ? "bg-yellow-500/10 text-yellow-500"
+                  : "bg-accent/10 text-accent";
+              return (
+                <Link
+                  key={event.event_contract}
+                  href={`/discover/${event.event_contract}`}
+                  className="p-6 pb-2 hover:bg-muted/30 transition-colors group cursor-pointer border-b md:border-b-0"
+                >
+                  <div className="space-y-4">
+                    {/* Event Image */}
+                    <div className="aspect-video border corner-accents overflow-hidden bg-black rounded-lg">
+                      <div
+                        className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                        style={{
+                          backgroundImage: `url(${getEventImage(event)})`,
+                        }}
+                      ></div>
+                    </div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div
+                        className={`px-2 py-1 text-xs font-bold rounded ${statusColor}`}
+                      >
+                        {status}
+                      </div>
+                      <div className="text-xs text-muted-foreground border px-2 py-1 rounded">
+                        {formatDate(event.created_at)}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg tracking-tight group-hover:text-accent transition-colors">
+                        {event.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1 font-mono">
+                        {truncateAddress(event.event_creator)}
+                      </p>
+                    </div>
+                    <div className="flex items-end justify-between pt-2 border-t">
+                      <div>
+                        <div className="text-xs text-muted-foreground">
+                          Price
+                        </div>
+                        <div className="font-bold text-accent">
+                          {event.primary_price} XLM
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs text-muted-foreground">
+                          Available
+                        </div>
+                        <div className="font-bold">
+                          {event.tickets_available}/{event.total_supply}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })
+          )}
         </div>
       </div>
       <div className="border border-t-0 grid grid-cols-1 md:grid-cols-3 md:divide-x corner-accents">
@@ -361,31 +443,43 @@ export default function Home() {
           <div className="flex-1 overflow-hidden relative">
             <div className="absolute inset-0 overflow-y-auto scrollbar-hide">
               <div className="divide-y">
-                {[...recentActivity, ...recentActivity].map(
-                  (activity, index) => (
-                    <div
-                      key={index}
-                      className="p-2 hover:bg-muted/30 transition-colors border-b"
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="text-xs font-medium truncate">
-                            {activity.user}
+                {isLoading ? (
+                  <div className="p-8 flex items-center justify-center">
+                    <Loader2 className="w-4 h-4 animate-spin text-accent" />
+                  </div>
+                ) : recentActivity.length === 0 ? (
+                  <div className="p-4 text-center">
+                    <p className="text-xs text-muted-foreground">
+                      No activity yet
+                    </p>
+                  </div>
+                ) : (
+                  [...recentActivity, ...recentActivity].map(
+                    (activity, index) => (
+                      <div
+                        key={index}
+                        className="p-2 hover:bg-muted/30 transition-colors border-b"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-medium truncate">
+                              {activity.user}
+                            </div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              {activity.event}
+                            </div>
                           </div>
-                          <div className="text-xs text-muted-foreground truncate">
-                            {activity.event}
-                          </div>
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          <div className="text-xs font-bold ">
-                            {activity.amount}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {activity.time}
+                          <div className="text-right flex-shrink-0">
+                            <div className="text-xs font-bold ">
+                              {activity.amount}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {activity.time}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    )
                   )
                 )}
               </div>

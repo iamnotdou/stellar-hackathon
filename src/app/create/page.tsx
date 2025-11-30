@@ -3,15 +3,17 @@
 import { MainLayout } from "@/components/layouts";
 import { useFreighter } from "@/providers/FreighterProvider";
 import { usePinataUpload } from "@/hooks/use-pinata-upload";
+import { useCreateEvent } from "@/hooks/use-create-event";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { CreateEventForm, type EventCreatePayload } from "./create-event-form";
 
 export default function CreateEventPage() {
-  const { publicKey, isConnected } = useFreighter();
+  const router = useRouter();
+  const { publicKey, isConnected, signTransaction } = useFreighter();
   const { uploadMetadata } = usePinataUpload();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const createEventMutation = useCreateEvent(signTransaction);
 
   const handleSubmit = async (payload: EventCreatePayload) => {
     if (!isConnected || !publicKey) {
@@ -21,8 +23,6 @@ export default function CreateEventPage() {
       });
       return;
     }
-
-    setIsSubmitting(true);
 
     try {
       // Step 1: Upload metadata to IPFS
@@ -38,33 +38,39 @@ export default function CreateEventPage() {
         console.log("Metadata uploaded to IPFS:", metadataUrl);
       } catch (ipfsError) {
         console.warn(
-          "IPFS metadata upload failed, continuing with local data:",
+          "IPFS metadata upload failed, using placeholder:",
           ipfsError
         );
-        // Continue without IPFS metadata URL
+        // Use a placeholder if IPFS upload fails
+        metadataUrl = `ipfs://placeholder-${Date.now()}`;
       }
 
-      // Step 2: Deploy contract (TODO: Replace with actual contract deployment)
-      toast.loading("Deploying contract...", { id: "deploy" });
+      // Step 2: Deploy contract to blockchain
+      toast.loading("Deploying event contract to Stellar...", { id: "deploy" });
 
-      const finalPayload = {
-        ...payload,
-        metadataUri: metadataUrl || undefined, // IPFS URI for the metadata
-      };
-
-      console.log("Final Event Payload:", finalPayload);
-
-      // Simulate deployment delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const result = await createEventMutation.mutateAsync({
+        name: payload.name,
+        eventCreator: payload.creatorAddress,
+        totalSupply: payload.maxSupply,
+        primaryPrice: payload.primaryPrice,
+        creatorFeeBps: payload.createFeeBps,
+        eventMetadata: metadataUrl,
+      });
 
       toast.success("Event Created Successfully!", {
         id: "deploy",
         description: `Your event "${
           payload.name
-        }" has been deployed to the blockchain.${
-          metadataUrl ? ` Metadata: ${metadataUrl.slice(0, 40)}...` : ""
-        }`,
+        }" has been deployed! Contract: ${result.eventContract.slice(
+          0,
+          16
+        )}...`,
       });
+
+      // Redirect to discover page after successful creation
+      setTimeout(() => {
+        router.push("/discover");
+      }, 2000);
     } catch (error) {
       console.error("Deployment error:", error);
       toast.error("Failed to create event", {
@@ -74,8 +80,6 @@ export default function CreateEventPage() {
             ? error.message
             : "An unexpected error occurred",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -132,7 +136,7 @@ export default function CreateEventPage() {
           <CreateEventForm
             creatorAddress={publicKey || ""}
             onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
+            isSubmitting={createEventMutation.isPending}
           />
         </div>
 

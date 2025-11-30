@@ -23,25 +23,18 @@ export function TicketInfo({
   };
 
   return (
-    <div
-      className={cn(
-        "border corner-accents p-3 bg-muted/10",
-        isPast && "opacity-60",
-        className
-      )}
-    >
+    <div className={cn("", isPast && "opacity-60", className)}>
       {/* Header with name and token ID */}
       <div className="flex items-start justify-between gap-2 mb-3">
         <h3
           className={cn(
-            "font-bold tracking-tight group-hover:text-accent transition-colors",
-            isCompact ? "text-xs" : "text-sm"
+            "font-bold tracking-tight group-hover:text-accent transition-colors"
           )}
         >
           {ticket.eventName}
         </h3>
         {!isCompact && (
-          <div className="text-xs text-accent font-mono border corner-accents px-2 py-0.5 bg-accent/5 shrink-0">
+          <div className="text-xs text-accent font-mono border  px-2 py-0.5 bg-accent/5 shrink-0">
             {ticket.tokenId}
           </div>
         )}

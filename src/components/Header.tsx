@@ -1,22 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "./ui/button";
+import { cn } from "@/lib/utils";
+import { useFreighter } from "@/providers/FreighterProvider";
 import {
-  Plus,
-  Copy,
-  LogOut,
+  CalendarPlus,
   Check,
   ChevronsUpDown,
-  ExternalLink,
-  Ticket,
   Compass,
-  CalendarPlus,
+  Copy,
+  ExternalLink,
+  LogOut,
+  Plus,
+  Ticket,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useFreighter } from "@/providers/FreighterProvider";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { FreighterConnect } from "./FreighterConnect";
+import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,17 +30,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
 } from "./ui/navigation-menu";
-import { Avatar, AvatarFallback } from "./ui/avatar";
-import { toast } from "sonner";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 // Navigation links with icons
 const navigationLinks: { href: string; label: string; icon: LucideIcon }[] = [
@@ -110,18 +110,16 @@ function WalletDisplay() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="flex items-center gap-2 border corner-accents px-2 py-1.5 rounded hover:bg-muted/30 transition-colors cursor-pointer outline-none data-[state=open]:bg-muted/30">
-            <Avatar className="h-8 w-8 rounded-lg">
-              <AvatarFallback className="rounded-lg bg-accent/10 text-accent text-xs font-bold">
-                {getInitials(publicKey)}
-              </AvatarFallback>
+            <Avatar className="h-3 w-3 rounded-lg">
+              <AvatarFallback className="rounded-lg bg-accent text-accent text-xs font-bold"></AvatarFallback>
             </Avatar>
-            <div className="grid flex-1 text-left text-sm leading-tight max-md:hidden">
+            <div className="grid flex-1 py-1 text-left text-sm leading-tight max-md:hidden">
               <span className="truncate font-medium text-xs">
                 {publicKey.slice(0, 6)}...{publicKey.slice(-4)}
               </span>
-              <span className="truncate text-xs text-muted-foreground">
+              {/* <span className="truncate text-xs text-muted-foreground">
                 {network || "Stellar"}
-              </span>
+              </span> */}
             </div>
             <ChevronsUpDown className="ml-auto size-4 text-muted-foreground max-md:hidden" />
           </button>
@@ -198,11 +196,6 @@ interface HeaderProps {
 
 export default function Header({ variant = "default" }: HeaderProps) {
   const pathname = usePathname();
-  const currentDate = new Date().toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
 
   const isTransparent = variant === "transparent";
 
@@ -316,11 +309,6 @@ export default function Header({ variant = "default" }: HeaderProps) {
                     >
                       My Tickets
                     </NavigationMenuLink>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem>
-                    <span className="py-1.5 text-sm text-muted-foreground">
-                      {currentDate}
-                    </span>
                   </NavigationMenuItem>
                 </NavigationMenuList>
               </NavigationMenu>

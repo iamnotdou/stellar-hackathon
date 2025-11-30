@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Figtree, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { FreighterProvider } from "@/providers/FreighterProvider";
+import { AuthProvider } from "@/providers/AuthProvider";
+import { QueryProvider } from "@/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
 
 const figtree = Figtree({
@@ -27,7 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={"dark"}>
       <body className={`${figtree.variable} ${geistMono.variable} antialiased`}>
-        <FreighterProvider>{children}</FreighterProvider>
+        <QueryProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </QueryProvider>
         <Toaster />
       </body>
     </html>

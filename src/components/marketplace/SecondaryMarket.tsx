@@ -43,7 +43,11 @@ function ListingRow({
           </span>
           <span
             className={`text-xs font-medium ${
-              isBelow ? "text-green-500" : isAbove ? "text-yellow-500" : "text-muted-foreground"
+              isBelow
+                ? "text-green-500"
+                : isAbove
+                ? "text-yellow-500"
+                : "text-muted-foreground"
             }`}
           >
             {isBelow ? "↓" : isAbove ? "↑" : ""}
@@ -109,7 +113,9 @@ function MarketStatsBar({
         <div className="text-xl font-bold mt-1">{listingsCount}</div>
       </div>
       <div className="p-4 hover:bg-muted/30 transition-colors">
-        <div className="text-xs text-muted-foreground font-bold">[ORIGINAL]</div>
+        <div className="text-xs text-muted-foreground font-bold">
+          [ORIGINAL]
+        </div>
         <div className="text-xl font-bold text-muted-foreground mt-1">
           {originalPrice.toFixed(2)} XLM
         </div>
@@ -146,7 +152,8 @@ export function SecondaryMarket({
   eventInfo,
   onBuy,
 }: SecondaryMarketProps) {
-  const [selectedListing, setSelectedListing] = useState<SecondaryListing | null>(null);
+  const [selectedListing, setSelectedListing] =
+    useState<SecondaryListing | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPurchasing, setIsPurchasing] = useState(false);
 
@@ -192,7 +199,8 @@ export function SecondaryMarket({
               </p>
             </div>
             <div className="text-sm text-muted-foreground">
-              {listings.length} listing{listings.length !== 1 ? "s" : ""} available
+              {listings.length} listing{listings.length !== 1 ? "s" : ""}{" "}
+              available
             </div>
           </div>
         </div>
@@ -204,7 +212,11 @@ export function SecondaryMarket({
         {listings.length > 0 ? (
           <div className="divide-y">
             {listings.map((listing) => (
-              <ListingRow key={listing.id} listing={listing} onBuy={handleBuyClick} />
+              <ListingRow
+                key={listing.id}
+                listing={listing}
+                onBuy={handleBuyClick}
+              />
             ))}
           </div>
         ) : (
@@ -216,9 +228,11 @@ export function SecondaryMarket({
           <div className="flex items-start gap-3 text-xs text-muted-foreground">
             <ShieldCheck className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold text-foreground">[BUYER_PROTECTION]</span>{" "}
-              All resale tickets are verified on-chain. Creator royalties (5%) are
-              automatically distributed.
+              <span className="font-bold text-foreground">
+                [BUYER_PROTECTION]
+              </span>{" "}
+              All resale tickets are verified on-chain. Creator royalties (5%)
+              are automatically distributed.
             </div>
           </div>
         </div>
@@ -236,4 +250,3 @@ export function SecondaryMarket({
     </>
   );
 }
-

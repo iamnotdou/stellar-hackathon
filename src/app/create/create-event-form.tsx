@@ -59,7 +59,7 @@ export interface EventCreatePayload {
 // CONSTANTS
 // ============================================================================
 
-const CATEGORIES = [
+export const CATEGORIES = [
   "Music",
   "Conference",
   "Sports",
@@ -153,17 +153,17 @@ const eventFormSchema = z.object({
     .min(1, "Must have at least 1 ticket")
     .max(1000000, "Maximum supply is 1,000,000"),
 
-  // Primary price
+  // Primary price (must be > 0 for contract)
   primaryPrice: z
     .number()
-    .min(0, "Price cannot be negative")
+    .min(0.0000001, "Price must be greater than 0")
     .max(1000000, "Price is too high"),
 
-  // Create fee in basis points (0-10000)
+  // Create fee in basis points (0-10000, but contract may require > 0)
   createFeeBps: z
     .number()
     .int("Must be a whole number")
-    .min(0, "Fee cannot be negative")
+    .min(100, "Minimum fee is 1% (100 basis points)")
     .max(10000, "Fee cannot exceed 100%"),
 });
 
@@ -211,8 +211,8 @@ export function CreateEventForm({
       secondaryMarketFee: 5,
       creatorAddress: creatorAddress,
       maxSupply: 100,
-      primaryPrice: 0,
-      createFeeBps: 0,
+      primaryPrice: 10, // 10 XLM default
+      createFeeBps: 500, // 5% default (500 basis points)
     },
     mode: "onBlur",
   });

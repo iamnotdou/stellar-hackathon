@@ -1,6 +1,12 @@
 "use client";
 
-import { ArrowUpRight, Loader2, ShieldCheck, TrendingUp, Tag } from "lucide-react";
+import {
+  ArrowUpRight,
+  Loader2,
+  ShieldCheck,
+  TrendingUp,
+  Tag,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   ResponsiveModal,
@@ -57,7 +63,9 @@ export function BuyTicketModal({
         {/* Price Breakdown */}
         <div className="space-y-3">
           <div className="flex items-center gap-3 before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border">
-            <span className="text-muted-foreground text-xs">Price Breakdown</span>
+            <span className="text-muted-foreground text-xs">
+              Price Breakdown
+            </span>
           </div>
 
           <div className="space-y-2 text-sm">
@@ -140,4 +148,3 @@ export function BuyTicketModal({
     </ResponsiveModal>
   );
 }
-

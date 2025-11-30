@@ -29,7 +29,7 @@ function ActionButton({
   loading,
 }: ActionButtonProps) {
   const variants = {
-    default: "hover:bg-accent/5 text-accent",
+    default: "hover:bg-muted text-white",
     danger: "hover:bg-destructive/5 text-destructive",
     success: "hover:bg-green-500/5 text-green-500",
   };
@@ -99,7 +99,6 @@ export function TicketActions({
           label="[CANCEL]"
           onClick={onCancelListing || (() => {})}
           disabled={disabled || !onCancelListing}
-          variant="danger"
         />
         <ActionButton
           icon={<ArrowUpRight className="w-4 h-4" />}

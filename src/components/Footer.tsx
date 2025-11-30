@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <div className="border border-t-0 corner-accents max-w-5xl mx-auto w-full">
       <div
-        className="p-6 md:p-8"
+        className="p-6 md:p-8 !smax-md:bg-transparent"
         style={{
           backgroundImage: `url(/bg.png)`,
           backgroundSize: "contain",
