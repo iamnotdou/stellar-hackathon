@@ -3,8 +3,8 @@ import {
   Client as NftClient,
   EventInfo,
   SecondaryListing as ContractSecondaryListing,
-} from "../../packages/sticket-nft-collections/src/index";
-import { networks } from "../../packages/sticket-factory/src/index";
+} from "../../sticket-contracts/packages/sticket-nft-collections/src/index";
+import { networks } from "../../sticket-contracts/packages/sticket-factory/src/index";
 
 const RPC_URL = "https://soroban-testnet.stellar.org";
 const NETWORK_PASSPHRASE = networks.testnet.networkPassphrase;
@@ -133,7 +133,7 @@ async function fetchEventDetails(contractId: string): Promise<EventDetails> {
     price_stroops: listing.price,
   }));
 
-  return {
+  const eventDetails: EventDetails = {
     contractId,
     name: eventInfo.name,
     symbol: eventInfo.symbol,
@@ -156,6 +156,8 @@ async function fetchEventDetails(contractId: string): Promise<EventDetails> {
     secondary_listings: secondaryListings,
     metadata,
   };
+  console.log(eventDetails);
+  return eventDetails;
 }
 
 export function useEventDetails(contractId: string | undefined) {

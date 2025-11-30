@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Client, networks } from "../../packages/sticket-factory/src/index";
+import { Client, networks } from "../../sticket-contracts/packages/sticket-factory/src/index";
 import { Buffer } from "buffer";
 
 const RPC_URL = "https://soroban-testnet.stellar.org";

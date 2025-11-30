@@ -3,11 +3,11 @@ import {
   Client as FactoryClient,
   networks,
   EventRecord,
-} from "../../packages/sticket-factory/src/index";
+} from "../../sticket-contracts/packages/sticket-factory/src/index";
 import {
   Client as NftClient,
   EventInfo,
-} from "../../packages/sticket-nft-collections/src/index";
+} from "../../sticket-contracts/packages/sticket-nft-collections/src/index";
 
 const RPC_URL = "https://soroban-testnet.stellar.org";
 const NETWORK_PASSPHRASE = networks.testnet.networkPassphrase;

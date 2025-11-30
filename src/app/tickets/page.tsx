@@ -11,7 +11,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   Client as NftClient,
   networks,
-} from "../../../packages/sticket-nft-collections/src/index";
+} from "../../../sticket-contracts/packages/sticket-nft-collections/src/index";
 
 import {
   TicketCard,

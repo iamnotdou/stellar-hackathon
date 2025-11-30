@@ -5,7 +5,7 @@ import { useFreighter } from "@/providers/FreighterProvider";
 import {
   Client as NftClient,
   networks,
-} from "../../packages/sticket-nft-collections/src/index";
+} from "../../sticket-contracts/packages/sticket-nft-collections/src/index";
 import type {
   Ticket,
   UseTicketActionsReturn,

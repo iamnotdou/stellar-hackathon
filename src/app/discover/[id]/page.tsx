@@ -29,7 +29,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Client } from "../../../../packages/sticket-nft-collections/src/index";
+import { Client } from "../../../../sticket-contracts/packages/sticket-nft-collections/src/index";
 
 // Network constants
 const SOROBAN_RPC_URL = "https://soroban-testnet.stellar.org";

@@ -260,9 +260,7 @@ export default function Home() {
                 <div className="w-1 h-4 group-hover:bg-accent transition-colors bg-muted rounded-full"></div>
                 {feature.title}
               </h2>
-              <p className="text-sm text-muted-foreground">
-                {feature.description}
-              </p>
+              <p className=" text-muted-foreground">{feature.description}</p>
             </div>
           </div>
         ))}
@@ -383,6 +381,34 @@ export default function Home() {
               );
             })
           )}
+        </div>
+      </div>
+      <div className="border border-t-0 corner-accents">
+        <div
+          className="p-6 md:p-8 border-b"
+          style={{
+            backgroundImage: `url(/bg.png)`,
+            backgroundSize: "contain",
+            backgroundPosition: "right",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <Link href="/rewards">
+              <Button className="font-mono gap-2">
+                Play
+                <ArrowUpRight className="w-4 h-4" />
+              </Button>
+            </Link>
+            <div className="text-right">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+                Earn Rewards
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Complete challenges and earn tokens
+              </p>
+            </div>
+          </div>
         </div>
       </div>
       <div className="border border-t-0 grid grid-cols-1 md:grid-cols-3 md:divide-x corner-accents">
