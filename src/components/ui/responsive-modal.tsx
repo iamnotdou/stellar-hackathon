@@ -73,7 +73,11 @@ export function ResponsiveModal({
             {(title || description || icon) && (
               <DrawerHeader className="text-center pb-2">
                 {icon && <div className="flex justify-center mb-2">{icon}</div>}
-                {title && <DrawerTitle>{title}</DrawerTitle>}
+                {title && (
+                  <DrawerTitle className="text-ellipsis w-full">
+                    {title}
+                  </DrawerTitle>
+                )}
                 {description && (
                   <DrawerDescription>{description}</DrawerDescription>
                 )}
@@ -95,7 +99,9 @@ export function ResponsiveModal({
               {icon}
               <DialogHeader>
                 {title && (
-                  <DialogTitle className="sm:text-center">{title}</DialogTitle>
+                  <DialogTitle className="sm:text-center text-ellipsis w-full">
+                    {title}
+                  </DialogTitle>
                 )}
                 {description && (
                   <DialogDescription className="sm:text-center">

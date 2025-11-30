@@ -523,13 +523,17 @@ export default function EventDetailPage() {
       >
         <ResponsiveModalContent>
           {/* Event Preview */}
-          <div className="flex items-center gap-3 border-t pt-5 ">
+          <div className="flex items-center gap-3 max-w-5xl w-full border-t pt-5 ">
             <div
               className="aspect-video h-14 rounded-lg border border-border bg-cover bg-center flex-shrink-0"
               style={{ backgroundImage: `url(${eventImage})` }}
             />
             <div className="flex-1 min-w-0">
-              <p className="font-medium truncate">{event.name}</p>
+              <p className="font-medium truncate text-ellipsis w-full text-ellipsis">
+                {event.name.length > 30
+                  ? event.name.slice(0, 30) + "..."
+                  : event.name}
+              </p>
               <p className="text-sm text-muted-foreground">
                 {formatDate(event.metadata?.dateTime)}
               </p>

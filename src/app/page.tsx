@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { FreighterConnect } from "@/components/FreighterConnect";
-import { useAllEvents, useEventCount, type FullEventData } from "@/hooks/use-all-events";
+import {
+  useAllEvents,
+  useEventCount,
+  type FullEventData,
+} from "@/hooks/use-all-events";
 import { useMemo } from "react";
 
 // Format timestamp to readable date
@@ -102,7 +106,12 @@ export default function Home() {
 
   // Stats calculated from live data
   const stats = useMemo(() => {
-    if (!events) return { totalEvents: eventCount ?? 0, ticketsSold: 0, totalAvailable: 0 };
+    if (!events)
+      return {
+        totalEvents: eventCount ?? 0,
+        ticketsSold: 0,
+        totalAvailable: 0,
+      };
     return {
       // Use direct event count from contract if available, otherwise fall back to events length
       totalEvents: eventCount ?? events.length,
@@ -389,7 +398,6 @@ export default function Home() {
         <div
           className="p-6 md:p-8 border-b"
           style={{
-            backgroundImage: `url(/WhatsApp%20Görsel%202025-11-29%20saat%2020.28.56_af709104.jpg)`,
             backgroundSize: "contain",
             backgroundPosition: "right center",
             backgroundRepeat: "no-repeat",

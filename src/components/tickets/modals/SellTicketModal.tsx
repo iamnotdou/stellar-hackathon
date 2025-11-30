@@ -1,16 +1,8 @@
 "use client";
 
-import { useState, useMemo, useId } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   ResponsiveModal,
   ResponsiveModalContent,
@@ -19,10 +11,11 @@ import {
 import {
   AlertTriangle,
   ArrowUpRight,
-  Loader2,
   CheckCircle2,
+  Loader2,
   Tag,
 } from "lucide-react";
+import { useId, useMemo, useState } from "react";
 import type { SellTicketModalProps } from "../types";
 
 type Step = "input" | "confirm" | "success";
@@ -167,18 +160,6 @@ export function SellTicketModal({
                 step="0.01"
                 className="flex-1"
               />
-              <Select
-                value={currency}
-                onValueChange={(v) => setCurrency(v as "XLM" | "USDC")}
-              >
-                <SelectTrigger className="w-24">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="XLM">XLM</SelectItem>
-                  <SelectItem value="USDC">USDC</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
             {error && (
               <div className="flex items-center gap-2 text-destructive text-xs mt-2">

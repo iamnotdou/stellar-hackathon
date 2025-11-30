@@ -111,7 +111,9 @@ export default function MyEventsPage() {
                   [TOTAL_REVENUE]
                 </div>
                 <div className="text-xl font-bold text-accent mt-1">
-                  {isLoading ? "..." : `${stats?.totalRevenue.toFixed(2) || 0} XLM`}
+                  {isLoading
+                    ? "..."
+                    : `${stats?.totalRevenue.toFixed(2) || 0} XLM`}
                 </div>
               </div>
             </div>
@@ -299,10 +301,10 @@ export default function MyEventsPage() {
                           </div>
 
                           {/* Actions */}
-                          <div className="flex gap-2 mt-3">
+                          <div className="flex justify-end gap-2 mt-3">
                             <Link
                               href={`/discover/${event.event_contract}`}
-                              className="flex-1"
+                              className=""
                             >
                               <Button
                                 variant="outline"
@@ -315,7 +317,7 @@ export default function MyEventsPage() {
                             </Link>
                             <Link
                               href={`/check-in/${event.event_contract}`}
-                              className="flex-1"
+                              className=""
                             >
                               <Button
                                 variant="default"
@@ -362,4 +364,3 @@ export default function MyEventsPage() {
     </MainLayout>
   );
 }
-
