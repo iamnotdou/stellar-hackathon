@@ -2,6 +2,10 @@
 
 A decentralized event ticketing platform built on **Stellar** that transforms tickets into Non-Fungible Tokens (NFTs). Built with Next.js, TypeScript, and Soroban smart contracts.
 
+## 🌐 Live Demo
+
+**🔗 [View Live Application](https://stellar-hackathon-85lb.vercel.app)**
+
 ## ✨ Features
 
 - **NFT-Based Tickets**: Each ticket is a unique, verifiable NFT on Stellar
