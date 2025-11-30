@@ -9,6 +9,7 @@ import {
   Compass,
   Copy,
   ExternalLink,
+  Gift,
   LogOut,
   Plus,
   Ticket,
@@ -42,6 +43,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 const navigationLinks: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/discover", label: "Discover", icon: Compass },
   { href: "/tickets", label: "My Tickets", icon: Ticket },
+  { href: "/rewards", label: "Rewards", icon: Gift },
   { href: "/create", label: "Create Event", icon: CalendarPlus },
 ];
 
@@ -308,6 +310,15 @@ export default function Header({ variant = "default" }: HeaderProps) {
                       href="/tickets"
                     >
                       My Tickets
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink
+                      active={pathname === "/rewards"}
+                      className="py-1.5 font-medium text-muted-foreground hover:text-primary"
+                      href="/rewards"
+                    >
+                      Rewards
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                 </NavigationMenuList>
