@@ -185,7 +185,11 @@ export default function Home() {
               </div>
               Sticket
             </Link>
-            <FreighterConnect />
+            <Link href="/discover">
+              <div className="!bg-accent/30 backdrop-blur-md h-fit hover:bg-accent/50 transition-colors cursor-pointer corner-accents border border-accent/20 text-accent px-3 py-1 w-fit font-medium">
+                Get Started
+              </div>
+            </Link>
           </div>
           <div className="p-8 md:p-20  flex flex-col items-center justify-center gap-4 py-40 lg:p-40">
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-center tracking-tighter">
@@ -193,15 +197,6 @@ export default function Home() {
               <br />
               Trade Them Freely.
             </h1>
-            <Link href="/discover">
-              <div className="!bg-accent/30 backdrop-blur-md h-fit hover:bg-accent/50 transition-colors cursor-pointer corner-accents border border-accent/20 text-accent px-3 py-1 w-fit font-medium">
-                Get Started
-              </div>
-            </Link>
-            {/* <p className="text-xl text-center text-muted-foreground max-w-2xl mx-auto">
-              The first truly transparent ticketing platform. Buy, sell, and
-              transfer event tickets as NFTs—no middlemen, no hidden fees.
-            </p> */}
           </div>
         </div>
       </div>

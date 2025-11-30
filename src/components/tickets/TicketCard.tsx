@@ -49,10 +49,11 @@ export function TicketCard({
   };
 
   const handleCancelListing = () => {
-    if (ticket.listingId) {
+    // For listed tickets, use tokenId as the listing identifier
+    if (ticket.isListed) {
       onCancelListing?.({
         ticketId: ticket.id,
-        listingId: ticket.listingId,
+        listingId: ticket.listingId || ticket.tokenId,
         ownerAddress: ticket.ownerAddress,
       });
     }

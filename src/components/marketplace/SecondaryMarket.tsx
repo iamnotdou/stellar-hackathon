@@ -185,7 +185,7 @@ export function SecondaryMarket({
 
   return (
     <>
-      <div className="border border-t-0 corner-accents">
+      <div className="border corner-accents">
         {/* Header */}
         <div className="p-6 md:p-8 border-b">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

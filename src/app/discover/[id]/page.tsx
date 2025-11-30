@@ -16,7 +16,6 @@ import { useFreighter } from "@/providers/FreighterProvider";
 import {
   AlertCircle,
   ArrowLeft,
-  ArrowUpRight,
   Check,
   Copy,
   Heart,
@@ -221,7 +220,7 @@ export default function EventDetailPage() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="min-h-[80vh] border-x border-t-0 corner-accents  max-w-5xl mx-auto flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             <p className="text-muted-foreground text-sm">Loading event...</p>
@@ -235,7 +234,7 @@ export default function EventDetailPage() {
   if (error || !event) {
     return (
       <MainLayout>
-        <div className="min-h-[80vh] flex items-center justify-center px-4">
+        <div className="min-h-[80vh] border flex items-center justify-center px-4">
           <div className="text-center space-y-6 max-w-md">
             <AlertCircle className="w-12 h-12 mx-auto text-destructive" />
             <div className="space-y-2">
@@ -270,7 +269,7 @@ export default function EventDetailPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-5xl border-x mx-auto px-4 py-8">
         {/* Back Button */}
         <Link
           href="/discover"
@@ -368,21 +367,16 @@ export default function EventDetailPage() {
             <div className="space-y-3">
               <h2 className="text-base font-semibold">Organized By</h2>
               <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30">
-                <div className="flex items-center gap-3">
-                  <div>
-                    <p className="font-medium text-sm flex items-center gap-2">
-                      Event Creator
-                    </p>
-                    <p className="text-xs text-muted-foreground font-mono">
-                      {event.event_creator.slice(0, 8)}...
-                      {event.event_creator.slice(-4)}
-                    </p>
-                  </div>
+                <div className="flex items-center justify-between w-full gap-3">
+                  <p className="text-sm text-muted-foreground">Event Creator</p>
+                  <button
+                    onClick={handleCopyContract}
+                    className="flex items-center gap-2 text-sm font-mono hover:text-accent"
+                  >
+                    {event.event_creator.slice(0, 8)}...
+                    {event.event_creator.slice(-6)}
+                  </button>
                 </div>
-                <Button variant="ghost" size="sm" className="text-sm">
-                  View Profile
-                  <ArrowUpRight className="w-3 h-3 ml-1" />
-                </Button>
               </div>
             </div>
 
@@ -502,7 +496,7 @@ export default function EventDetailPage() {
 
       {/* Secondary Market */}
       {secondaryListings.length > 0 && (
-        <div className="max-w-6xl mx-auto px-4 md:px-6 pb-12">
+        <div className="max-w-5xl mx-auto pb-12">
           <SecondaryMarket
             listings={secondaryListings}
             originalPrice={event.primary_price}

@@ -1,12 +1,17 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { MainLayout } from "@/components/layouts";
 import { ArrowUpRight, QrCode, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useFreighter } from "@/providers/FreighterProvider";
 import { FreighterConnect } from "@/components/FreighterConnect";
 import { useUserTickets, type UserTicket } from "@/hooks/use-user-tickets";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  Client as NftClient,
+  networks,
+} from "../../../packages/sticket-nft-collections/src/index";
 
 import {
   TicketCard,
@@ -79,8 +84,15 @@ function mapToTicket(userTicket: UserTicket): Ticket {
 }
 
 export default function MyTicketsPage() {
-  const { isConnected, publicKey } = useFreighter();
+  const { isConnected, publicKey, signTransaction, signAuthEntry } =
+    useFreighter();
   const { data: userTickets, isLoading, error } = useUserTickets(publicKey);
+  const queryClient = useQueryClient();
+
+  // Delist state
+  const [delistingTicketId, setDelistingTicketId] = useState<string | null>(
+    null
+  );
 
   const {
     selectedTicket,
@@ -92,7 +104,6 @@ export default function MyTicketsPage() {
     closeModal,
     sendTicket,
     listTicket,
-    cancelListing,
     downloadTicket,
   } = useTicketActions();
 
@@ -149,23 +160,83 @@ export default function MyTicketsPage() {
     if (ticket) downloadTicket(ticket);
   };
 
-  const handleCancelListing = async (params: {
-    ticketId: string;
-    listingId: string;
-    ownerAddress: string;
-  }) => {
-    const ticket = tickets.find((t) => t.id === params.ticketId);
-    if (ticket) {
-      openViewModal(ticket); // Open view modal to show processing state
-      try {
-        await cancelListing();
-        closeModal();
-        // Ticket will be refreshed by react-query
-      } catch (err) {
-        console.error("Cancel listing failed:", err);
+  // Direct delist function that calls the contract
+  const handleCancelListing = useCallback(
+    async (params: {
+      ticketId: string;
+      listingId: string;
+      ownerAddress: string;
+    }) => {
+      const ticket = tickets.find((t) => t.id === params.ticketId);
+      if (!ticket || !publicKey || !signTransaction || !signAuthEntry) {
+        console.error("Missing required data for delist");
+        return;
       }
-    }
-  };
+
+      setDelistingTicketId(params.ticketId);
+
+      try {
+        // Create NFT client for this contract
+        const nftClient = new NftClient({
+          contractId: ticket.contractAddress,
+          networkPassphrase: networks.testnet.networkPassphrase,
+          rpcUrl: "https://soroban-testnet.stellar.org",
+          publicKey,
+          signTransaction: async (xdr: string) => {
+            const result = await signTransaction(xdr, {
+              networkPassphrase: networks.testnet.networkPassphrase,
+              address: publicKey,
+            });
+            return {
+              signedTxXdr: result.signedTxXdr,
+              signerAddress: result.signerAddress,
+            };
+          },
+          signAuthEntry: async (entryXdr: string) => {
+            const result = await signAuthEntry(entryXdr, {
+              networkPassphrase: networks.testnet.networkPassphrase,
+              address: publicKey,
+            });
+            if (!result.signedAuthEntry) {
+              throw new Error("Failed to sign auth entry");
+            }
+            return {
+              signedAuthEntry: result.signedAuthEntry,
+              signerAddress: result.signerAddress,
+            };
+          },
+        });
+
+        // Extract ticket_id from tokenId
+        const ticketId = parseInt(ticket.tokenId.replace(/\D/g, ""), 10);
+
+        console.log("Delisting ticket:", {
+          seller: publicKey,
+          ticketId,
+          contractAddress: ticket.contractAddress,
+        });
+
+        // Call delist_ticket on the contract
+        const tx = await nftClient.delist_ticket({
+          seller: publicKey,
+          ticket_id: ticketId,
+        });
+
+        // Sign and submit
+        await tx.signAndSend();
+
+        console.log("Ticket delisted successfully!");
+
+        // Refresh tickets
+        queryClient.invalidateQueries({ queryKey: ["user-tickets"] });
+      } catch (err) {
+        console.error("Delist failed:", err);
+      } finally {
+        setDelistingTicketId(null);
+      }
+    },
+    [tickets, publicKey, signTransaction, signAuthEntry, queryClient]
+  );
 
   return (
     <MainLayout>
@@ -272,6 +343,7 @@ export default function MyTicketsPage() {
                       onSell={handleSell}
                       onCancelListing={handleCancelListing}
                       onDownload={handleDownload}
+                      isLoading={delistingTicketId === ticket.id}
                     />
                   ))}
                 </div>

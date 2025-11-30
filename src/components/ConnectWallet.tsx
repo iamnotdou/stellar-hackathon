@@ -7,8 +7,15 @@ import { useEffect, useState } from "react";
 import { Wallet, LogOut, Loader2 } from "lucide-react";
 
 export function ConnectWallet() {
-  const { isConnected, publicKey, connect, disconnect, ready, isLoading, error } =
-    useAuth();
+  const {
+    isConnected,
+    publicKey,
+    connect,
+    disconnect,
+    ready,
+    isLoading,
+    error,
+  } = useAuth();
   const [connecting, setConnecting] = useState(false);
 
   useEffect(() => {
@@ -81,8 +88,7 @@ export function ConnectWallet() {
   return (
     <Button
       onClick={handleConnect}
-      className="font-mono"
-      size="sm"
+      className=""
       disabled={connecting || isLoading}
     >
       {connecting || isLoading ? (
@@ -91,10 +97,7 @@ export function ConnectWallet() {
           Connecting...
         </>
       ) : (
-        <>
-          <Wallet className="w-4 h-4 mr-2" />
-          Connect
-        </>
+        <>Connect Wallet</>
       )}
     </Button>
   );
@@ -104,4 +107,3 @@ export function ConnectWallet() {
 export { ConnectWallet as FreighterConnect };
 
 export default ConnectWallet;
-

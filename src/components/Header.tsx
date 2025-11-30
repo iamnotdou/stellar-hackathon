@@ -113,7 +113,7 @@ function WalletDisplay() {
             <Avatar className="h-3 w-3 rounded-lg">
               <AvatarFallback className="rounded-lg bg-accent text-accent text-xs font-bold"></AvatarFallback>
             </Avatar>
-            <div className="grid flex-1 py-1 text-left text-sm leading-tight max-md:hidden">
+            <div className="grid flex-1 py-1 text-left text-sm leading-tight ">
               <span className="truncate font-medium text-xs">
                 {publicKey.slice(0, 6)}...{publicKey.slice(-4)}
               </span>

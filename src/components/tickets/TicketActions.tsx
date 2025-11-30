@@ -84,10 +84,10 @@ export function TicketActions({
     );
   }
 
-  // Listed tickets have different actions
+  // Listed tickets have different actions - VIEW and DELIST only
   if (isListed) {
     return (
-      <div className="grid grid-cols-3 divide-x border corner-accents">
+      <div className="grid grid-cols-2 divide-x border corner-accents">
         <ActionButton
           icon={<QrCode className="w-4 h-4" />}
           label="[VIEW]"
@@ -96,15 +96,10 @@ export function TicketActions({
         />
         <ActionButton
           icon={<XCircle className="w-4 h-4" />}
-          label="[CANCEL]"
+          label="[DELIST]"
           onClick={onCancelListing || (() => {})}
           disabled={disabled || !onCancelListing}
-        />
-        <ActionButton
-          icon={<ArrowUpRight className="w-4 h-4" />}
-          label="[EDIT]"
-          onClick={onSell}
-          disabled={disabled}
+          variant="danger"
         />
       </div>
     );
