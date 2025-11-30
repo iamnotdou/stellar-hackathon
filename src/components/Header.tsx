@@ -59,6 +59,12 @@ export default function Header() {
             >
               My Tickets
             </Link>
+            <Link
+              href="/rewards"
+              className="text-sm hover:text-accent transition-colors"
+            >
+              Rewards
+            </Link>
             <div className="text-sm text-muted-foreground">{currentDate}</div>
           </nav>
 
